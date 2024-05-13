@@ -1,11 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -68,6 +78,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  final FirebaseFirestore instance = FirebaseFirestore.instance;
+
+  Future<bool> insert(String key, String value) async {
+    final map = {'key': key, 'value': value};
+    var result = true;
+    await instance.collection("dic").doc('a').set(map).then((value) {}).onError((e, _) {
+      result = false;
+    });
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -116,7 +137,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () async {
+          print(await insert("1", '2'));
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
